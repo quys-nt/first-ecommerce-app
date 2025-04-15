@@ -17,7 +17,7 @@ export function NavMain({
 }: {
   items: {
     name: string
-    url?: string
+    url: string
     icon: LucideIcon
   }[]
 }) {
@@ -32,7 +32,7 @@ export function NavMain({
                 asChild
                 isActive={item.name === "Dashboard"}
               >
-                <Link href="#">
+                <Link href={item.url}>
                   <item.icon />
                   <span>{item.name}</span>
                 </Link>

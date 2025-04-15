@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 const data = {
   user: {
@@ -32,12 +33,12 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
-    { name: "Dashboard", icon: LayoutDashboard },
-    { name: "Users", icon: Users },
-    { name: "Carts", icon: ShoppingCart },
-    { name: "Products", icon: Box },
-    { name: "Medias", icon: Camera },
-    { name: "Settings", icon: Settings },
+    { name: "Dashboard", icon: LayoutDashboard, url: "/dashboard/"},
+    { name: "Users", icon: Users, url: "/dashboard/users/"},
+    { name: "Orders", icon: ShoppingCart, url: "/dashboard/orders/"},
+    { name: "Products", icon: Box, url: "/dashboard/products/"},
+    { name: "Media", icon: Camera, url: "/dashboard/media/"},
+    { name: "Settings", icon: Settings, url: "/dashboard/settings/"},
   ],
   navSecondary: [
     {
@@ -59,19 +60,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <span>
+            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
+              <Link href="/">
                 <span className="text-base font-semibold">E-Commerce</span>
-              </span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain}/>
+        <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
