@@ -2,8 +2,6 @@
 
 import * as React from "react"
 import {
-  SearchIcon,
-  SettingsIcon,
   Users,
   Box,
   ShoppingCart,
@@ -13,7 +11,6 @@ import {
 } from "lucide-react"
 
 import { NavMain } from "@/components/sidebar/nav-main"
-import { NavSecondary } from "@/components/sidebar/nav-secondary"
 import { NavUser } from "@/components/sidebar/nav-user"
 import {
   Sidebar,
@@ -40,18 +37,6 @@ const data = {
     { name: "Media", icon: Camera, url: "/dashboard/media/"},
     { name: "Settings", icon: Settings, url: "/dashboard/settings/"},
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: SettingsIcon,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: SearchIcon,
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -70,7 +55,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "./ui/button";
+import { ThemeToggle } from "./theme-toggle";
 
 export default function MainLayout({
   children,
@@ -17,6 +18,7 @@ export default function MainLayout({
             <Button variant="ghost" className="" asChild>
               <Link href="/login">Login</Link>
             </Button>
+            <ThemeToggle />
           </nav>
         </div>
       </header>
