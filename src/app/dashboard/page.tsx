@@ -8,12 +8,8 @@ export const metadata: Metadata = {
 export default function Dashboard() {
   return (
     <>
-      {Array.from({ length: 10 }).map((_, i) => (
-        <div
-          key={i}
-          className="aspect-video max-w-full rounded-xl bg-muted/50"
-        />
-      ))}
+      <h1>Dashboard</h1>
+      <p>Chào mừng bạn đến với dashboard!</p>
     </>
   )
 

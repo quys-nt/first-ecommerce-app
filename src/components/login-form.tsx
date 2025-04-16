@@ -1,62 +1,117 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+// src/components/login-form.tsx
+"use client";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      if (!auth || !db) {
+        throw new Error("Firebase chưa khởi tạo");
+      }
+
+      console.log("Đang đăng nhập:", email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      console.log("UID:", user.uid);
+
+      console.log("Tạo idToken...");
+      const idToken = await user.getIdToken();
+      console.log("idToken:", idToken.substring(0, 10) + "...");
+
+      console.log("Lấy vai trò...");
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+      if (!userDoc.exists()) {
+        throw new Error("Không tìm thấy người dùng");
+      }
+      const role = userDoc.data().role;
+      console.log("Vai trò:", role);
+
+      console.log("Gửi token đến API...");
+      const response = await fetch("/api/set-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Lỗi API:", errorData);
+        throw new Error(errorData.error || "Không thể lưu token");
+      }
+
+      console.log("Token lưu thành công");
+
+      if (role === "admin") {
+        console.log("Chuyển hướng đến /dashboard...");
+        router.push("/dashboard");
+      } else {
+        setError("Chỉ admin được truy cập dashboard");
+        await auth.signOut();
+      }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("Lỗi:", err);
+      setError(err.message || "Đăng nhập thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Đăng Nhập</CardTitle>
-          <CardDescription>
-            Nhập email của bạn bên dưới để đăng nhập vào tài khoản của bạn
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input id="password" type="password" required />
-              </div>
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
-              <Button type="button" variant="outline" className="w-full">
-                Login with Google
-              </Button>
-            </div>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <a href="#" className="underline underline-offset-4">
-              Sign up
-            </a>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Đăng nhập</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="nhap@email.com"
+            />
           </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
+          <div className="space-y-2">
+            <Label htmlFor="password">Mật khẩu</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Nhập mật khẩu"
+            />
+          </div>
+          {error && <p className="text-sm text-red-500">{error}</p>}
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
 }

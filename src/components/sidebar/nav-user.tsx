@@ -25,6 +25,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { toast } from "sonner";
+import { useLogout } from "@/hooks/useLogout";
 
 export function NavUser({
   user,
@@ -35,7 +37,21 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const { isMobile } = useSidebar()
+  const { logout } = useLogout();
+  const { isMobile } = useSidebar();
+
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result.success) {
+      toast("Thành công",{
+        description: "Đã đăng xuất",
+      });
+    } else {
+      toast("Lỗi",{
+        description: result.error || "Không thể đăng xuất",
+      });
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -72,9 +88,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOutIcon />
-              Log out
+              Log out 1
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -18,5 +18,4 @@ export default function DashboardLayout({
       </SidebarInset>
     </SidebarProvider>
   )
-
 }
