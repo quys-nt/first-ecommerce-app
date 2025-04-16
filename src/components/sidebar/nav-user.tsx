@@ -90,7 +90,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOutIcon />
-              Log out 1
+              Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -1,22 +1,54 @@
-// src/components/login-form.tsx
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+
+  useEffect(() => {
+    if (searchParams.get("redirected") === "true") {
+      toast("Yêu cầu đăng nhập", {
+        description: "Vui lòng đăng nhập để truy cập dashboard",
+      });
+    }
+  }, [searchParams, toast]);
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        console.log("User đã đăng nhập:", user.uid);
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists() && userDoc.data().role === "admin") {
+          console.log("Admin đã đăng nhập, chuyển hướng đến /dashboard");
+          router.push("/dashboard");
+        } else {
+          setCheckingAuth(false);
+        }
+      } else {
+        console.log("Chưa đăng nhập");
+        setCheckingAuth(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +108,10 @@ export default function LoginForm() {
       setLoading(false);
     }
   };
+
+  if (checkingAuth) {
+    return <div>Đang kiểm tra trạng thái...</div>;
+  }
 
   return (
     <Card className="w-full max-w-md">
